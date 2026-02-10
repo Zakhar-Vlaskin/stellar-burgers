@@ -11,7 +11,7 @@ import { OrderCardUIProps } from './type';
 import { OrderStatus } from '@components';
 
 export const OrderCardUI: FC<OrderCardUIProps> = memo(
-  ({ orderInfo, maxIngredients, locationState, isProfileOrders = false }) => (
+  ({ orderInfo, maxIngredients, locationState }) => (
     <Link
       to={orderInfo.number.toString()}
       relative='path'
@@ -29,16 +29,18 @@ export const OrderCardUI: FC<OrderCardUIProps> = memo(
       <h4 className={`pt-6 text text_type_main-medium ${styles.order_name}`}>
         {orderInfo.name}
       </h4>
-      {isProfileOrders && <OrderStatus status={orderInfo.status} />}
+      {location.pathname === '/profile/orders' && (
+        <OrderStatus status={orderInfo.status} />
+      )}
       <div className={`pt-6 ${styles.order_content}`}>
         <ul className={styles.ingredients}>
           {orderInfo.ingredientsToShow.map((ingredient, index) => {
-            const zIndex = maxIngredients - index;
-            const right = 20 * index;
+            let zIndex = maxIngredients - index;
+            let right = 20 * index;
             return (
               <li
                 className={styles.img_wrap}
-                style={{ zIndex, right }}
+                style={{ zIndex: zIndex, right: right }}
                 key={index}
               >
                 <img
