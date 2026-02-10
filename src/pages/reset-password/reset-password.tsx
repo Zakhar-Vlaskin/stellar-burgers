@@ -1,24 +1,35 @@
 import { FC, SyntheticEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { resetPasswordApi } from '@api';
+import { resetPassword } from '@slices';
 import { ResetPasswordUI } from '@ui-pages';
 
+import { useDispatch } from '../../services/store';
+
 export const ResetPassword: FC = () => {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [token, setToken] = useState('');
-  const [error, setError] = useState<Error | null>(null);
+  const [errorText, setErrorText] = useState<string | undefined>(undefined);
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
-    setError(null);
-    resetPasswordApi({ password, token })
-      .then(() => {
+    setErrorText(undefined);
+
+    const submitReset = async () => {
+      try {
+        await dispatch(resetPassword({ password, token })).unwrap();
         localStorage.removeItem('resetPassword');
         navigate('/login');
-      })
-      .catch((err) => setError(err));
+      } catch (error) {
+        setErrorText(
+          typeof error === 'string' ? error : 'Не удалось сбросить пароль'
+        );
+      }
+    };
+
+    void submitReset();
   };
 
   useEffect(() => {
@@ -29,7 +40,7 @@ export const ResetPassword: FC = () => {
 
   return (
     <ResetPasswordUI
-      errorText={error?.message}
+      errorText={errorText}
       password={password}
       token={token}
       setPassword={setPassword}
