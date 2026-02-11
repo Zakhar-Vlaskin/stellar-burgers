@@ -9,7 +9,7 @@ import {
   selectOrderError,
   selectProfileOrders
 } from '@selectors';
-import { clearOrderData, fetchOrderByNumber, fetchIngredients } from '@slices';
+import { clearOrderData, fetchOrderByNumber } from '@slices';
 import { TIngredient } from '@utils-types';
 import { Preloader } from '../ui/preloader';
 import { OrderInfoUI } from '../ui/order-info';
@@ -41,12 +41,6 @@ export const OrderInfo: FC = () => {
   }, [feedOrders, profileOrders, orderNumber]);
 
   const resolvedOrder = orderFromLists || orderData;
-
-  useEffect(() => {
-    if (!ingredients.length) {
-      void dispatch(fetchIngredients());
-    }
-  }, [dispatch, ingredients.length]);
 
   useEffect(() => {
     if (!Number.isFinite(orderNumber) || orderFromLists) {

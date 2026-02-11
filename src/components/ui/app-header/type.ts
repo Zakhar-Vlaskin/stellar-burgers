@@ -1,4 +1,4 @@
 export type TAppHeaderUIProps = {
   userName?: string;
-  pathname?: string;
+  isIngredientDetails?: boolean;
 };

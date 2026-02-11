@@ -1,5 +1,4 @@
 import { FC, SyntheticEvent, useState } from 'react';
-import { Location, useLocation, useNavigate } from 'react-router-dom';
 
 import { selectAuthError } from '@selectors';
 import { registerUser } from '@slices';
@@ -9,8 +8,6 @@ import { useDispatch, useSelector } from '../../services/store';
 
 export const Register: FC = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const authError = useSelector(selectAuthError);
 
@@ -21,14 +18,11 @@ export const Register: FC = () => {
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
 
-    const from = (location.state as { from?: Location })?.from?.pathname || '/';
-
     const register = async () => {
       try {
         await dispatch(
           registerUser({ name: userName, email, password })
         ).unwrap();
-        navigate(from, { replace: true });
       } catch {}
     };
 

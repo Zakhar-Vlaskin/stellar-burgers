@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useMatch } from 'react-router-dom';
 
 import { AppHeaderUI } from '@ui';
 import { selectUser } from '@selectors';
@@ -7,8 +7,13 @@ import { selectUser } from '@selectors';
 import { useSelector } from '../../services/store';
 
 export const AppHeader: FC = () => {
-  const { pathname } = useLocation();
   const user = useSelector(selectUser);
+  const ingredientDetailsMatch = useMatch('/ingredients/:id');
 
-  return <AppHeaderUI userName={user?.name} pathname={pathname} />;
+  return (
+    <AppHeaderUI
+      userName={user?.name}
+      isIngredientDetails={!!ingredientDetailsMatch}
+    />
+  );
 };
