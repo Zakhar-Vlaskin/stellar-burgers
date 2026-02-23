@@ -3,33 +3,22 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { getIngredientsApi } from '@api';
 import { TIngredient } from '@utils-types';
 
-import { getErrorMessage } from './utils';
-
 export type IngredientsState = {
-  items: TIngredient[];
+  data: TIngredient[];
   isLoading: boolean;
   error: string | null;
 };
 
-const initialState: IngredientsState = {
-  items: [],
+export const initialState: IngredientsState = {
+  data: [],
   isLoading: false,
   error: null
 };
 
-export const fetchIngredients = createAsyncThunk<
-  TIngredient[],
-  void,
-  { rejectValue: string }
->('ingredients/fetchIngredients', async (_, { rejectWithValue }) => {
-  try {
-    return await getIngredientsApi();
-  } catch (error) {
-    return rejectWithValue(
-      getErrorMessage(error, 'Не удалось загрузить ингредиенты')
-    );
-  }
-});
+export const fetchIngredients = createAsyncThunk(
+  'ingredients/fetchAll',
+  async () => getIngredientsApi()
+);
 
 const ingredientsSlice = createSlice({
   name: 'ingredients',
@@ -42,12 +31,12 @@ const ingredientsSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchIngredients.fulfilled, (state, action) => {
-        state.items = action.payload;
         state.isLoading = false;
+        state.data = action.payload;
       })
       .addCase(fetchIngredients.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || 'Не удалось загрузить ингредиенты';
+        state.error = action.error.message || 'Ошибка загрузки ингредиентов';
       });
   }
 });

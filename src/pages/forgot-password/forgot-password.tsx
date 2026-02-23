@@ -1,43 +1,30 @@
-import { FC, SyntheticEvent, useState } from 'react';
+import { FC, useState, SyntheticEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { forgotPassword } from '@slices';
+import { forgotPasswordApi } from '@api';
 import { ForgotPasswordUI } from '@ui-pages';
 
-import { useDispatch } from '../../services/store';
-
 export const ForgotPassword: FC = () => {
-  const dispatch = useDispatch();
   const [email, setEmail] = useState('');
-  const [errorText, setErrorText] = useState<string | undefined>(undefined);
+  const [error, setError] = useState<Error | null>(null);
 
   const navigate = useNavigate();
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
 
-    setErrorText(undefined);
-
-    const requestReset = async () => {
-      try {
-        await dispatch(forgotPassword({ email })).unwrap();
+    setError(null);
+    forgotPasswordApi({ email })
+      .then(() => {
         localStorage.setItem('resetPassword', 'true');
         navigate('/reset-password', { replace: true });
-      } catch (error) {
-        setErrorText(
-          typeof error === 'string'
-            ? error
-            : 'Не удалось отправить письмо для сброса пароля'
-        );
-      }
-    };
-
-    void requestReset();
+      })
+      .catch((err) => setError(err));
   };
 
   return (
     <ForgotPasswordUI
-      errorText={errorText}
+      errorText={error?.message}
       email={email}
       setEmail={setEmail}
       handleSubmit={handleSubmit}

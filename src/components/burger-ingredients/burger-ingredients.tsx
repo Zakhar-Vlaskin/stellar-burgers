@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect, FC, useMemo } from 'react';
 import { useInView } from 'react-intersection-observer';
 
-import { TTabMode } from '@utils-types';
-import { selectIngredients } from '@selectors';
+import { TIngredient, TTabMode } from '@utils-types';
 import { BurgerIngredientsUI } from '../ui/burger-ingredients';
-
+import { selectIngredients } from '@selectors';
 import { useSelector } from '../../services/store';
 
 export const BurgerIngredients: FC = () => {
@@ -14,10 +13,12 @@ export const BurgerIngredients: FC = () => {
     () => ingredients.filter((item) => item.type === 'bun'),
     [ingredients]
   );
+
   const mains = useMemo(
     () => ingredients.filter((item) => item.type === 'main'),
     [ingredients]
   );
+
   const sauces = useMemo(
     () => ingredients.filter((item) => item.type === 'sauce'),
     [ingredients]
@@ -52,23 +53,20 @@ export const BurgerIngredients: FC = () => {
 
   const onTabClick = (tab: string) => {
     setCurrentTab(tab as TTabMode);
-    if (tab === 'bun') {
+    if (tab === 'bun')
       titleBunRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-    if (tab === 'main') {
+    if (tab === 'main')
       titleMainRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
-    if (tab === 'sauce') {
+    if (tab === 'sauce')
       titleSaucesRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }
   };
 
   return (
     <BurgerIngredientsUI
       currentTab={currentTab}
-      buns={buns}
-      mains={mains}
-      sauces={sauces}
+      buns={buns as TIngredient[]}
+      mains={mains as TIngredient[]}
+      sauces={sauces as TIngredient[]}
       titleBunRef={titleBunRef}
       titleMainRef={titleMainRef}
       titleSaucesRef={titleSaucesRef}

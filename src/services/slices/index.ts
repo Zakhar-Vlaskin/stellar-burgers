@@ -1,7 +1,19 @@
-export * from './ingredientsSlice';
-export * from './constructorSlice';
-export * from './authSlice';
-export * from './feedSlice';
-export * from './profileOrdersSlice';
-export * from './orderSlice';
-export * from './passwordSlice';
+export {
+  addIngredient,
+  clearConstructor,
+  constructorReducer,
+  moveIngredientDown,
+  moveIngredientUp,
+  removeIngredient,
+  setBun
+} from './constructorSlice';
+
+export {
+  fetchIngredients,
+  ingredientsReducer,
+  initialState as ingredientsInitialState
+} from './ingredientsSlice';
+
+export { clearOrderModal, createOrder, orderReducer } from './orderSlice';
+
+export { fetchUser, userReducer } from './userSlice';
