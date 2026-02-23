@@ -1,34 +1,80 @@
 import { ProfileUI } from '@ui-pages';
-import { FC, SyntheticEvent, useEffect, useState } from 'react';
+import { selectUpdateUserError, selectUser } from '@selectors';
+import { updateUser } from '@slices';
+import { ChangeEvent, FC, SyntheticEvent, useEffect, useState } from 'react';
+
+import { Preloader } from '../../components/ui';
+import { useDispatch, useSelector } from '../../services/store';
 
 export const Profile: FC = () => {
-  /** TODO: взять переменную из стора */
-  const user = {
-    name: '',
-    email: ''
-  };
+  const dispatch = useDispatch();
+
+  const user = useSelector(selectUser);
+  const updateUserError = useSelector(selectUpdateUserError);
 
   const [formValue, setFormValue] = useState({
-    name: user.name,
-    email: user.email,
+    name: '',
+    email: '',
     password: ''
   });
 
   useEffect(() => {
+    if (!user) {
+      return;
+    }
+
     setFormValue((prevState) => ({
       ...prevState,
-      name: user?.name || '',
-      email: user?.email || ''
+      name: user.name,
+      email: user.email
     }));
   }, [user]);
 
+  if (!user) {
+    return <Preloader />;
+  }
+
   const isFormChanged =
-    formValue.name !== user?.name ||
-    formValue.email !== user?.email ||
+    formValue.name !== user.name ||
+    formValue.email !== user.email ||
     !!formValue.password;
 
   const handleSubmit = (e: SyntheticEvent) => {
     e.preventDefault();
+
+    const changedFields: Partial<{
+      name: string;
+      email: string;
+      password: string;
+    }> = {};
+
+    if (formValue.name !== user.name) {
+      changedFields.name = formValue.name;
+    }
+
+    if (formValue.email !== user.email) {
+      changedFields.email = formValue.email;
+    }
+
+    if (formValue.password) {
+      changedFields.password = formValue.password;
+    }
+
+    if (!Object.keys(changedFields).length) {
+      return;
+    }
+
+    const saveProfile = async () => {
+      try {
+        await dispatch(updateUser(changedFields)).unwrap();
+        setFormValue((prevState) => ({
+          ...prevState,
+          password: ''
+        }));
+      } catch {}
+    };
+
+    void saveProfile();
   };
 
   const handleCancel = (e: SyntheticEvent) => {
@@ -40,7 +86,7 @@ export const Profile: FC = () => {
     });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormValue((prevState) => ({
       ...prevState,
       [e.target.name]: e.target.value
@@ -54,8 +100,7 @@ export const Profile: FC = () => {
       handleCancel={handleCancel}
       handleSubmit={handleSubmit}
       handleInputChange={handleInputChange}
+      updateUserError={updateUserError || undefined}
     />
   );
-
-  return null;
 };

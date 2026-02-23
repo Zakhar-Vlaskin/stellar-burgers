@@ -1,27 +1,36 @@
 import { FC, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+
 import { TConstructorIngredient } from '@utils-types';
 import { BurgerConstructorUI } from '@ui';
-import {
-  clearConstructor,
-  clearOrderModal,
-  createOrder
-} from '@slices';
+import { clearConstructor, clearOrderModal, createOrder } from '@slices';
 import {
   selectConstructorItems,
   selectOrderModalData,
-  selectOrderRequest
+  selectOrderRequest,
+  selectUser
 } from '@selectors';
+
+import { getCookie } from '../../utils/cookie';
 import { useDispatch, useSelector } from '../../services/store';
 
 export const BurgerConstructor: FC = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const constructorItems = useSelector(selectConstructorItems);
   const orderRequest = useSelector(selectOrderRequest);
   const orderModalData = useSelector(selectOrderModalData);
+  const user = useSelector(selectUser);
 
   const onOrderClick = () => {
     if (!constructorItems.bun || orderRequest) return;
+
+    if (!user && !getCookie('accessToken')) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
 
     const ingredientsIds = [
       constructorItems.bun._id,
@@ -29,12 +38,18 @@ export const BurgerConstructor: FC = () => {
       constructorItems.bun._id
     ];
 
-    void dispatch(createOrder(ingredientsIds));
+    const submitOrder = async () => {
+      try {
+        await dispatch(createOrder(ingredientsIds)).unwrap();
+        dispatch(clearConstructor());
+      } catch {}
+    };
+
+    void submitOrder();
   };
 
   const closeOrderModal = () => {
     dispatch(clearOrderModal());
-    dispatch(clearConstructor());
   };
 
   const price = useMemo(

@@ -1,18 +1,37 @@
 import { FC, useEffect } from 'react';
 import {
-  Routes,
+  Location,
   Route,
+  Routes,
   useLocation,
-  useNavigate,
-  Location
+  useNavigate
 } from 'react-router-dom';
 
-import { ConstructorPage, NotFound404 } from '@pages';
+import {
+  ConstructorPage,
+  Feed,
+  ForgotPassword,
+  IngredientDetailsPage,
+  Login,
+  NotFound404,
+  OrderInfoPage,
+  Profile,
+  ProfileOrders,
+  Register,
+  ResetPassword
+} from '@pages';
+import {
+  AppHeader,
+  IngredientDetails,
+  Modal,
+  OrderInfo,
+  ProtectedRoute
+} from '@components';
+import { fetchIngredients, fetchUser, setAuthChecked } from '@slices';
+
 import '../../index.css';
 import styles from './app.module.css';
 
-import { AppHeader, IngredientDetails, Modal } from '@components';
-import { fetchIngredients, fetchUser } from '@slices';
 import { getCookie } from '../../utils/cookie';
 import { useDispatch } from '../../services/store';
 
@@ -29,6 +48,8 @@ const App: FC = () => {
 
     if (getCookie('accessToken')) {
       void dispatch(fetchUser());
+    } else {
+      dispatch(setAuthChecked(true));
     }
   }, [dispatch]);
 
@@ -40,15 +61,63 @@ const App: FC = () => {
 
       <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
+        <Route path='/feed' element={<Feed />} />
         <Route
-          path='/ingredients/:id'
+          path='/login'
           element={
-            <div className={styles.detailPageWrap}>
-              <h1 className={`${styles.detailHeader} text text_type_main-large`}>
-                Детали ингредиента
-              </h1>
-              <IngredientDetails />
-            </div>
+            <ProtectedRoute onlyUnAuth>
+              <Login />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/register'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <Register />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/forgot-password'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ForgotPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/reset-password'
+          element={
+            <ProtectedRoute onlyUnAuth>
+              <ResetPassword />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile'
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path='/profile/orders'
+          element={
+            <ProtectedRoute>
+              <ProfileOrders />
+            </ProtectedRoute>
+          }
+        />
+        <Route path='/ingredients/:id' element={<IngredientDetailsPage />} />
+        <Route path='/feed/:number' element={<OrderInfoPage />} />
+        <Route
+          path='/profile/orders/:number'
+          element={
+            <ProtectedRoute>
+              <OrderInfoPage />
+            </ProtectedRoute>
           }
         />
         <Route path='*' element={<NotFound404 />} />
@@ -62,6 +131,24 @@ const App: FC = () => {
               <Modal title='Детали ингредиента' onClose={closeModal}>
                 <IngredientDetails />
               </Modal>
+            }
+          />
+          <Route
+            path='/feed/:number'
+            element={
+              <Modal title='Информация о заказе' onClose={closeModal}>
+                <OrderInfo />
+              </Modal>
+            }
+          />
+          <Route
+            path='/profile/orders/:number'
+            element={
+              <ProtectedRoute>
+                <Modal title='Информация о заказе' onClose={closeModal}>
+                  <OrderInfo />
+                </Modal>
+              </ProtectedRoute>
             }
           />
         </Routes>

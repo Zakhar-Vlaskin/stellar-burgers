@@ -14,6 +14,22 @@ export {
   initialState as ingredientsInitialState
 } from './ingredientsSlice';
 
-export { clearOrderModal, createOrder, orderReducer } from './orderSlice';
+export {
+  clearOrderData,
+  clearOrderModal,
+  createOrder,
+  fetchFeeds,
+  fetchOrderByNumber,
+  fetchProfileOrders,
+  orderReducer
+} from './orderSlice';
 
-export { fetchUser, userReducer } from './userSlice';
+export {
+  fetchUser,
+  loginUser,
+  logoutUser,
+  registerUser,
+  setAuthChecked,
+  updateUser,
+  userReducer
+} from './userSlice';
