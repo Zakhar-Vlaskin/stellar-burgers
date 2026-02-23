@@ -1,13 +1,15 @@
-import { TConstructorIngredient, TIngredient } from '@utils-types';
+import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
 
 import {
   addIngredient,
+  clearConstructor,
   constructorReducer,
   moveIngredientDown,
   moveIngredientUp,
   removeIngredient,
   setBun
 } from './constructorSlice';
+import { createOrder } from './orderSlice';
 
 const bun: TIngredient = {
   _id: 'bun-1',
@@ -53,10 +55,23 @@ const sauceIngredient: TConstructorIngredient = {
   image_large: 'https://code.s3.yandex.net/react/code/sauce-02-large.png'
 };
 
+const order: TOrder = {
+  _id: 'order-1',
+  status: 'done',
+  name: 'Флюоресцентный бургер',
+  createdAt: '2026-02-23T10:00:00.000Z',
+  updatedAt: '2026-02-23T10:10:00.000Z',
+  number: 12345,
+  ingredients: [bun._id, mainIngredient._id, sauceIngredient._id]
+};
+
 describe('constructorSlice reducer', () => {
   it('должен добавлять ингредиент в начинку', () => {
     const stateWithBun = constructorReducer(undefined, setBun(bun));
-    const state = constructorReducer(stateWithBun, addIngredient(mainIngredient));
+    const state = constructorReducer(
+      stateWithBun,
+      addIngredient(mainIngredient)
+    );
 
     expect(state.bun).toEqual(bun);
     expect(state.ingredients).toEqual([mainIngredient]);
@@ -82,10 +97,57 @@ describe('constructorSlice reducer', () => {
       addIngredient(sauceIngredient)
     );
 
-    const movedUpState = constructorReducer(stateWithIngredients, moveIngredientUp(1));
+    const movedUpState = constructorReducer(
+      stateWithIngredients,
+      moveIngredientUp(1)
+    );
     expect(movedUpState.ingredients).toEqual([sauceIngredient, mainIngredient]);
 
-    const movedDownState = constructorReducer(movedUpState, moveIngredientDown(0));
-    expect(movedDownState.ingredients).toEqual([mainIngredient, sauceIngredient]);
+    const movedDownState = constructorReducer(
+      movedUpState,
+      moveIngredientDown(0)
+    );
+    expect(movedDownState.ingredients).toEqual([
+      mainIngredient,
+      sauceIngredient
+    ]);
+  });
+
+  it('должен очищать конструктор по экшену clearConstructor', () => {
+    const stateWithIngredients = constructorReducer(
+      constructorReducer(
+        constructorReducer(undefined, setBun(bun)),
+        addIngredient(mainIngredient)
+      ),
+      addIngredient(sauceIngredient)
+    );
+
+    const state = constructorReducer(stateWithIngredients, clearConstructor());
+
+    expect(state.bun).toBeNull();
+    expect(state.ingredients).toEqual([]);
+  });
+
+  it('должен очищать конструктор после успешного создания заказа', () => {
+    const stateWithIngredients = constructorReducer(
+      constructorReducer(
+        constructorReducer(undefined, setBun(bun)),
+        addIngredient(mainIngredient)
+      ),
+      addIngredient(sauceIngredient)
+    );
+
+    const state = constructorReducer(
+      stateWithIngredients,
+      createOrder.fulfilled(order, 'request-id', [
+        bun._id,
+        mainIngredient._id,
+        sauceIngredient._id,
+        bun._id
+      ])
+    );
+
+    expect(state.bun).toBeNull();
+    expect(state.ingredients).toEqual([]);
   });
 });
